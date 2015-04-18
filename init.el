@@ -5,8 +5,8 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "146d24de1bb61ddfa64062c29b5ff57065552a7c4019bee5d869e938782dfc2a" "297063d0000ca904abb446944398843edaa7ef2c659b7f9087d724bf6f8c1d1f" "c7359bd375132044fe993562dfa736ae79efc620f68bab36bd686430c980df1c" "50edb7914e8d369bc03820d2dcde7e74b7efe2af5a39511d3a130508e2f6ac8f" "3a727bdc09a7a141e58925258b6e873c65ccf393b2240c51553098ca93957723" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" default)))
- '(electric-layout-mode t)
+	("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "146d24de1bb61ddfa64062c29b5ff57065552a7c4019bee5d869e938782dfc2a" "297063d0000ca904abb446944398843edaa7ef2c659b7f9087d724bf6f8c1d1f" "c7359bd375132044fe993562dfa736ae79efc620f68bab36bd686430c980df1c" "50edb7914e8d369bc03820d2dcde7e74b7efe2af5a39511d3a130508e2f6ac8f" "3a727bdc09a7a141e58925258b6e873c65ccf393b2240c51553098ca93957723" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" default)))
+ '(electric-layout-mode nil)
  '(electric-pair-inhibit-predicate (quote electric-pair-conservative-inhibit))
  '(electric-pair-mode t))
 (custom-set-faces
@@ -61,18 +61,29 @@
 (add-hook 'after-init-hook 'global-flycheck-mode)
 (eval-after-load 'flycheck
   '(progn
-     (require 'flycheck-google-cpplint)
-     ;; Add Google C++ Style checker.
-     ;; In default, syntax checked by Clang and Cppcheck.
-     (flycheck-add-next-checker 'c/c++-clang
-                                'c/c++-googlelint 'append)))
+	 (require 'flycheck-google-cpplint)
+	 ;; Add Google C++ Style checker.
+	 ;; In default, syntax checked by Clang and Cppcheck.
+	 (flycheck-add-next-checker 'c/c++-clang
+								'c/c++-googlelint 'append)))
 
 ;;(defun my-setup-includes ()
 ;;  (setq flycheck-clang-include-path '("/Users/src"
-;;				      "/Users/include"))
+;;					  "/Users/include"))
 ;;  (setq flycheck-clang-language-standard "c++11")
 ;;  (setq flycheck-clang-standard-library "libc++")
 ;;  (setq flycheck-clang-definitions '("CC_TARGET_OS_MAC" "CC_ENABLE_CHIPMUNK_INTEGRATION" "CC_KEYBOARD_SUPPORT" "USE_FILE32API")))
+
+
+;; EXAMPLE FOR PROJECT SETUP
+;;(defun project-setup-includes ()
+;;  (setq flycheck-clang-include-path '("/path/to/include"
+;;									  "/path/to/include"))
+;;  (setq flycheck-clang-language-standard "c++11")
+;;  (setq flycheck-clang-standard-library "libc++")
+;;  (setq flycheck-clang-definitions '("CC_TARGET_OS_MAC" "CC_ENABLE_CHIPMUNK_INTEGRATION" "CC_KEYBOARD_SUPPORT" "USE_FILE32API")))
+
+;;(setq default-directory "/path/to/project")
 
 (add-hook 'c-mode-common-hook 'my-setup-includes)
 
@@ -89,9 +100,15 @@
 
 (define-key global-map (kbd "C-;") 'iedit-mode)
 
-;; emacs built-in
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-mode))
 
-(set-default-font "PragmataPro 14")
+;; emacs built-in
+(setq-default tab-width 4)
+(setq-default indent-tabs-mode t)
+(add-hook 'before-save-hook 'whitespace-cleanup)
+
+(set-frame-font "PragmataPro 14" nil t)
 
 (load-theme 'flatui t)
 
@@ -112,18 +129,24 @@
 
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
-(tool-bar-mode -1) 
+(tool-bar-mode -1)
 (setq inhibit-startup-message t)
 (setq inhibit-startup-echo-area-message t)
 (kill-buffer "*scratch*")
 (setq ring-bell-function 'ignore)
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(setq backup-directory-alist '(("." . "~/.emacs.d/backups/")))
+(defvar backup-dir (expand-file-name "~/.emacs.d/backup/"))
+(defvar autosave-dir (expand-file-name "~/.emacs.d/auto-save/"))
+(setq backup-directory-alist (list (cons ".*" backup-dir)))
+(setq auto-save-file-name-transforms `((".*" ,autosave-dir t))) ;; doesnt work for some whatever reason
 
-(toggle-frame-fullscreen)
+;;(toggle-frame-fullscreen)
 
 (setq default-directory "~/")
 
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.ipp\\'" . c++-mode))
+
+(exec-path-from-shell-copy-env "GOPATH")
+(exec-path-from-shell-copy-env "PATH")
