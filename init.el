@@ -5,10 +5,11 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-	("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "146d24de1bb61ddfa64062c29b5ff57065552a7c4019bee5d869e938782dfc2a" "297063d0000ca904abb446944398843edaa7ef2c659b7f9087d724bf6f8c1d1f" "c7359bd375132044fe993562dfa736ae79efc620f68bab36bd686430c980df1c" "50edb7914e8d369bc03820d2dcde7e74b7efe2af5a39511d3a130508e2f6ac8f" "3a727bdc09a7a141e58925258b6e873c65ccf393b2240c51553098ca93957723" "6a37be365d1d95fad2f4d185e51928c789ef7a4ccf17e7ca13ad63a8bf5b922f" "756597b162f1be60a12dbd52bab71d40d6a2845a3e3c2584c6573ee9c332a66e" default)))
- '(electric-layout-mode nil)
+	("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" default)))
  '(electric-pair-inhibit-predicate (quote electric-pair-conservative-inhibit))
- '(electric-pair-mode t))
+ '(electric-pair-mode t)
+ '(js2-bounce-indent-p t)
+ '(git-gutter:hide-gutter t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -22,12 +23,30 @@
 (package-initialize)
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
 
+(require 'git-gutter)
+(global-git-gutter-mode +1)
+
 (require 'smart-mode-line)
 (sml/setup)
-(sml/apply-theme 'automatic)
+(sml/apply-theme 'nil)
+;; (sml/apply-theme 'automatic)
+
+(require 'flycheck)
+(add-hook 'after-init-hook 'global-flycheck-mode)
+;;(eval-after-load 'flycheck
+;;  '(progn
+;;	 (require 'flycheck-google-cpplint)
+;;	 ;; Add Google C++ Style checker.
+;;	 ;; In default, syntax checked by Clang and Cppcheck.
+;;	 (flycheck-add-next-checker 'c/c++-clang
+;;								'(warnings-only . c/c++-googlelint))))
+
 
 (require 'company)
 (add-hook 'after-init-hook 'global-company-mode)
+
+(require 'ensime)
+(add-hook 'scala-mode-hook 'ensime-scala-mode-hook)
 
 (require 'irony)
 (add-hook 'c++-mode-hook 'irony-mode)
@@ -57,15 +76,8 @@
 (require 'yasnippet)
 (yas-global-mode 1)
 
-(require 'flycheck)
-(add-hook 'after-init-hook 'global-flycheck-mode)
-(eval-after-load 'flycheck
-  '(progn
-	 (require 'flycheck-google-cpplint)
-	 ;; Add Google C++ Style checker.
-	 ;; In default, syntax checked by Clang and Cppcheck.
-	 (flycheck-add-next-checker 'c/c++-clang
-								'c/c++-googlelint 'append)))
+(require 'go-mode)
+(add-hook 'before-save-hook #'gofmt-before-save)
 
 ;;(defun my-setup-includes ()
 ;;  (setq flycheck-clang-include-path '("/Users/src"
@@ -85,7 +97,7 @@
 
 ;;(setq default-directory "/path/to/project")
 
-(add-hook 'c-mode-common-hook 'my-setup-includes)
+;; (add-hook 'c-mode-common-hook 'my-setup-includes)
 
 ;; start google-c-style with emacs
 (require 'google-c-style)
@@ -102,8 +114,11 @@
 
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-mode))
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 
 ;; emacs built-in
+(add-hook 'after-change-major-mode-hook (lambda() (electric-indent-mode -1)))
+
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode t)
 (add-hook 'before-save-hook 'whitespace-cleanup)
